@@ -28,15 +28,7 @@ public class AuthController {
             return ResponseEntity.badRequest().body("Faltan datos (username/password)");
         }
 
-        // ✅ Si escriben letras (Rodrigo, Jorge, etc.) -> error
-        if (!username.matches("\\d+")) {
-            return ResponseEntity.status(401).body("Usuario o contraseña incorrectos");
-        }
-
-        // ✅ Quitar ceros a la izquierda: 000999 -> 999 (solo para buscar)
-        String usernameNormalizado = username.replaceFirst("^0+(?!$)", "");
-
-        Optional<Usuario> usuarioOptional = usuarioRepository.findByUsername(usernameNormalizado);
+        Optional<Usuario> usuarioOptional = usuarioRepository.findByUsername(username);
 
         if (usuarioOptional.isEmpty()) {
             return ResponseEntity.status(401).body("Usuario o contraseña incorrectos");
@@ -48,13 +40,11 @@ public class AuthController {
             return ResponseEntity.status(401).body("Usuario o contraseña incorrectos");
         }
 
-        // ✅ Nombre completo desde Bombero si existe
         String nombreCompleto = "";
         if (usuario.getBombero() != null && usuario.getBombero().getNombre_apellido() != null) {
             nombreCompleto = usuario.getBombero().getNombre_apellido();
         }
 
-        // ✅ Nota: devolvemos username REAL guardado (sin ceros) porque está en DB
         return ResponseEntity.ok(
                 Map.of(
                         "idUsuario", usuario.getIdUsuario(),
